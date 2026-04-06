@@ -693,6 +693,7 @@ body.light-mode .page-side {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -710,6 +711,7 @@ body.light-mode .page-side {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
