@@ -35,8 +35,7 @@ RULES:
 ${glossaryEntries}
 4. TABLES: The input uses Markdown table format (| col |). KEEP this format.
 5. ZERO OMISSION: You must translate every single line and unit provided. NEVER summarize or skip text.
-6. STRUCTURE & NUMBERING: Keep all Markdown headers (#) and numbering (1., 1.1., etc.) EXACTLY as provided. Do NOT merge paragraphs or remove numbers.
-7. Tone: ${style}. Accurate and technical.
+6. Tone: ${style}. Accurate and technical.
 CRITICAL: If the input is long, do NOT truncate. Return the full translation.`;
 
     try {
@@ -269,11 +268,12 @@ RULES:
 2. Format: [[number]] Translation
 3. Do not add any conversational text.
 4. If a unit is already in ${humanLang}, return it as is.
-5. ZERO OMISSION: You must translate every single unit provided. Do NOT skip items.
-6. NUMBERING: If a unit contains a chapter number (e.g., 1.1.1), PRESERVE it at the start of the translation.
-7. GLOSSARY:
+5. ZERO OMISSION: You must translate every single unit provided, even if they look repetitive (e.g., Figure 1, Figure 2). Do NOT summarize or skip items using "...".
+CRITICAL: OUTPUT_LANGUAGE must be [${humanLang}]. DO NOT return English if the target is different. 
+Even for technical labels like "Name", "Date", "Revision", translate them into ${humanLang}.
+GLOSSARY:
 ${glossaryEntries}
-8. STYLE: ${style}`;
+STYLE: ${style}`;
 
     const openai = getOpenAIClient(apiKey);
     

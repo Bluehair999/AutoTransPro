@@ -453,8 +453,8 @@ function updateUI(project) {
     const cleanOrig = (page.originalText || '').replace(/```(markdown|html|text)?/g, '').replace(/```/g, '').trim();
     
     // MarkDown Table Conversion
-    const finalTrans = markdownToHtml(cleanTrans);
-    const finalOrig = markdownToHtml(cleanOrig);
+    const finalTrans = cleanTrans.includes('|') ? markdownTableToHtml(cleanTrans) : cleanTrans;
+    const finalOrig = cleanOrig.includes('|') ? markdownTableToHtml(cleanOrig) : cleanOrig;
 
     const sourceContent = document.getElementById('source-content');
     const targetContent = document.getElementById('target-content');
@@ -517,82 +517,37 @@ function enableSyncScroll(source, target) {
 /**
  * [추가] 마크다운 표 -> HTML 테이블 변환 헬퍼
  */
-function markdownToHtml(md) {
-    if (!md) return "";
-    let html = md.trim();
-    
-    // 1. Headers (Robust pattern)
-    // Handle "# Header", "## Header", etc. even with trailing spaces
-    html = html.replace(/^\s*# (.*$)/gm, '<h1>$1</h1>');
-    html = html.replace(/^\s*## (.*$)/gm, '<h2>$1</h2>');
-    html = html.replace(/^\s*### (.*$)/gm, '<h3>$1</h3>');
-    html = html.replace(/^\s*#### (.*$)/gm, '<h4>$1</h4>');
-    html = html.replace(/^\s*##### (.*$)/gm, '<h5>$1</h5>');
-    html = html.replace(/^\s*###### (.*$)/gm, '<h6>$1</h6>');
-
-    // 2. Bold / Italic
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    html = html.replace(/_(.*?)_/g, '<em>$1</em>');
-
-    // 3. Multiline Processing (Tables & Paragraphs)
-    const lines = html.split('\n');
-    let finalHtml = '';
+function markdownTableToHtml(md) {
+    const lines = md.trim().split('\n');
+    let html = '';
     let inTable = false;
-    let tableHtml = '';
-
+    
     for (let line of lines) {
         const trimmed = line.trim();
-        
-        // Handle Tables
-        if (trimmed.startsWith('|') && (trimmed.endsWith('|') || trimmed.includes('|'))) {
+        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
             if (!inTable) {
                 inTable = true;
-                tableHtml = '<div class="table-container"><table class="rendered-table">';
+                html += '<div class="table-container"><table class="rendered-table"><thead>';
             }
-            if (trimmed.includes('---')) continue;
+            // Split by | and filter out empty strings (ends of |)
+            const cells = trimmed.split('|').slice(1, -1);
             
-            const cells = trimmed.split('|').filter((_, i, a) => i > 0 && i < a.length - 1);
-            if (cells.length > 0) {
-                tableHtml += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+            if (trimmed.includes('---')) {
+                html += '</thead><tbody>';
+                continue;
             }
-            continue;
-        } 
-        
-        // Finalize Table if active
-        if (inTable) {
-            tableHtml += '</table></div>';
-            finalHtml += tableHtml;
-            inTable = false;
-            tableHtml = '';
-        }
-
-        // Handle Headers (Already replaced) or Paragraphs
-        if (trimmed) {
-            if (trimmed.startsWith('<h')) {
-                finalHtml += trimmed;
-            } else {
-                finalHtml += `<p>${trimmed}</p>`;
-            }
+            
+            html += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
         } else {
-            finalHtml += '<br/>';
+            if (inTable) {
+                html += '</tbody></table></div>';
+                inTable = false;
+            }
+            html += `<p>${line}</p>`;
         }
     }
-    
-    if (inTable) finalHtml += tableHtml + '</table></div>';
-    return finalHtml;
-}
-
-// Updated call sites
-function updateUI(project) {
-    // ...
-    const cleanTrans = (page.translatedText || '').replace(/```(markdown|html|text)?/g, '').replace(/```/g, '').trim();
-    const cleanOrig = (page.originalText || '').replace(/```(markdown|html|text)?/g, '').replace(/```/g, '').trim();
-    
-    const finalTrans = markdownToHtml(cleanTrans);
-    const finalOrig = markdownToHtml(cleanOrig);
-    // ...
+    if (inTable) html += '</tbody></table></div>';
+    return html;
 }
 
 document.getElementById('btn-prev-page').addEventListener('click', (e) => {
