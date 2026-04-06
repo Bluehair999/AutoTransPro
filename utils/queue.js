@@ -27,6 +27,7 @@ function calculateCost(usage, model = 'gpt-4o') {
  */
 async function startProcessing(project, taskQueue, outputDir, options = {}) {
   project.status = 'processing';
+  project.subStatus = '대기열에서 작업 시작 중...';
   project.usage = project.usage || { totalTokens: 0, estimatedCost: 0, apiCalls: 0, cacheHits: 0, skipped: 0, model: options.model || 'gpt-4o' };
   
   // 타이머 강제 초기화 (재시동 시에도 작동하도록)
@@ -42,6 +43,9 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
     
     try {
       if (file.mimetype === 'application/pdf') {
+        project.subStatus = '문서를 페이지 단위로 분할하는 중...';
+        storage.saveProject(project);
+
         const pages = file.pages.length > 0 ? file.pages : (await splitPdf(file.path, outputDir)).map(p => ({
           id: `${file.id}_p${p.index}`,
           pageNumber: p.index, 
@@ -62,8 +66,13 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
         // [Global Sprint] 전체 페이지에서 중복 단어 추출 및 선제적 번역
         const uniqueUnits = extractGlobalUnits(file.pages);
         if (uniqueUnits.length > 0 && !project.stopRequested) {
+            project.subStatus = `문서 내 공통 용어 및 문구 분석 중 (${uniqueUnits.length}개)...`;
+            storage.saveProject(project);
+            
             const translationMap = await processGlobalVocabulary(project, file, uniqueUnits, options);
             hydratePagesWithMap(file, translationMap);
+            
+            project.subStatus = '페이지별 상세 번역 및 검증 시작...';
             storage.saveProject(project);
         }
 
@@ -141,8 +150,13 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
           // [Global Sprint] 전체 페이지에서 중복 단어 추출 및 선제적 번역
           const uniqueUnits = extractGlobalUnits(file.pages);
           if (uniqueUnits.length > 0 && !project.stopRequested) {
+              project.subStatus = `단락 분석 및 공통 용어 일괄 처리 중 (${uniqueUnits.length}개)...`;
+              storage.saveProject(project);
+              
               const translationMap = await processGlobalVocabulary(project, file, uniqueUnits, options);
               hydratePagesWithMap(file, translationMap);
+              
+              project.subStatus = '단락별 상세 번역 시작...';
               storage.saveProject(project);
           }
 

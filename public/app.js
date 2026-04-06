@@ -380,6 +380,13 @@ function updateUI(project) {
             progressRunningActions.style.display = 'flex';
             progressCompleteActions.style.display = 'none';
             progressIcon.innerHTML = '<i data-lucide="loader-2" class="spin" color="#0ea5e9" size="40"></i>';
+            
+            // 상세 상태 표시
+            if (project.subStatus && progress < 5) {
+                progressStatus.textContent = project.subStatus;
+            } else {
+                progressStatus.textContent = `${translatedPages} / ${totalPages} 페이지 완료됨`;
+            }
         }
 
         // Estimate Time
