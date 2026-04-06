@@ -376,37 +376,46 @@ function splitMarkdownByLength(markdown, maxLength) {
 function htmlToMarkdown(html) {
     let md = html;
     
-    // Convert <table>... to Markdown Table format
-    md = md.replace(/<table[^>]*>/gi, '\n');
-    md = md.replace(/<\/table>/gi, '\n');
+    // 1. Convert Headers (h1-h6) to Markdown
+    md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '\n# $1\n');
+    md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '\n## $1\n');
+    md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '\n### $1\n');
+    md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '\n#### $1\n');
+    md = md.replace(/<h5[^>]*>(.*?)<\/h5>/gi, '\n##### $1\n');
+    md = md.replace(/<h6[^>]*>(.*?)<\/h6>/gi, '\n###### $1\n');
+
+    // 2. Convert Tables to Markdown format (Already existing logic improved)
+    md = md.replace(/<table[^>]*>/gi, '\n\n');
+    md = md.replace(/<\/table>/gi, '\n\n');
     md = md.replace(/<tr[^>]*>/gi, '| ');
     md = md.replace(/<\/tr>/gi, '\n');
     md = md.replace(/<td[^>]*>/gi, ' ');
     md = md.replace(/<\/td>/gi, ' |');
     
-    // Convert <li> inside <ul>/<ol> to Markdown markers
-    md = md.replace(/<li>/gi, '\n* ');
+    // 3. Convert List Items
+    md = md.replace(/<li[^>]*>/gi, '\n* ');
     md = md.replace(/<\/li>/gi, '');
+    md = md.replace(/<ul[^>]*>/gi, '\n');
+    md = md.replace(/<\/ul>/gi, '\n');
+    md = md.replace(/<ol[^>]*>/gi, '\n');
+    md = md.replace(/<\/ol>/gi, '\n');
     
-    // Add separator line for headers (simple assumption)
-    md = md.replace(/\|\s+(.*?)\s+(.*?)\n/g, (match) => {
-        if (match.includes('|')) {
-            return match + '|---|---|\n';
-        }
-        return match;
-    });
+    // 4. Formatting tags
+    md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+    md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+    md = md.replace(/<i[^>]*>(.*?)<\/i>/gi, '_$1_');
+    md = md.replace(/<em[^>]*>(.*?)<\/em>/gi, '_$1_');
 
-    // Strip other tags
+    // 5. Line breaks and Paragraphs
     md = md.replace(/<p[^>]*>/gi, '\n');
     md = md.replace(/<\/p>/gi, '\n');
     md = md.replace(/<br\s*\/?>/gi, '\n');
-    md = md.replace(/<strong[^>]*>/gi, '**');
-    md = md.replace(/<\/strong>/gi, '**');
-    md = md.replace(/<b[^>]*>/gi, '**');
-    md = md.replace(/<\/b>/gi, '**');
+
+    // 6. Strip remaining tags carefully
     md = md.replace(/<[^>]+>/g, ''); 
     
-    return md.replace(/\n{3,}/g, '\n\n').trim(); // 과도한 줄바꿈은 제거하되 단락 구분은 유지
+    // 7. Cleanup extra spaces and newlines
+    return md.replace(/\n\s*\n\s*\n/g, '\n\n').trim();
 }
 
 /**
