@@ -1027,14 +1027,30 @@ body.light-mode .rendered-table tbody tr:nth-child(even) {
 
 .page-inner-content h1, .page-inner-content h2, .page-inner-content h3 {
     color: var(--primary);
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
     font-weight: 700;
+    line-height: 1.2;
 }
 
-.page-inner-content h1 { font-size: 1.5rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; }
-.page-inner-content h2 { font-size: 1.3rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
-.page-inner-content h3 { font-size: 1.15rem; }
+.page-inner-content h1 { 
+    font-size: 1.6rem; 
+    border-bottom: 2px solid var(--primary); 
+    padding-bottom: 0.6rem;
+    margin-top: 1rem; 
+}
+
+.page-inner-content h2 { 
+    font-size: 1.4rem; 
+    border-left: 4px solid var(--primary); 
+    padding-left: 1rem;
+    margin-top: 1.8rem;
+}
+
+.page-inner-content h3 { 
+    font-size: 1.2rem; 
+    padding-left: 0.5rem;
+}
 .page-inner-content h4, .page-inner-content h5, .page-inner-content h6 {
     margin-top: 1rem;
     margin-bottom: 0.5rem;

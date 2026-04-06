@@ -519,15 +519,16 @@ function enableSyncScroll(source, target) {
  */
 function markdownToHtml(md) {
     if (!md) return "";
-    let html = md;
+    let html = md.trim();
     
-    // 1. Headers
-    html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-    html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-    html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-    html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
-    html = html.replace(/^##### (.*$)/gm, '<h5>$1</h5>');
-    html = html.replace(/^###### (.*$)/gm, '<h6>$1</h6>');
+    // 1. Headers (Robust pattern)
+    // Handle "# Header", "## Header", etc. even with trailing spaces
+    html = html.replace(/^\s*# (.*$)/gm, '<h1>$1</h1>');
+    html = html.replace(/^\s*## (.*$)/gm, '<h2>$1</h2>');
+    html = html.replace(/^\s*### (.*$)/gm, '<h3>$1</h3>');
+    html = html.replace(/^\s*#### (.*$)/gm, '<h4>$1</h4>');
+    html = html.replace(/^\s*##### (.*$)/gm, '<h5>$1</h5>');
+    html = html.replace(/^\s*###### (.*$)/gm, '<h6>$1</h6>');
 
     // 2. Bold / Italic
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -535,7 +536,7 @@ function markdownToHtml(md) {
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     html = html.replace(/_(.*?)_/g, '<em>$1</em>');
 
-    // 3. Tables (improved logic)
+    // 3. Multiline Processing (Tables & Paragraphs)
     const lines = html.split('\n');
     let finalHtml = '';
     let inTable = false;
@@ -543,34 +544,43 @@ function markdownToHtml(md) {
 
     for (let line of lines) {
         const trimmed = line.trim();
-        if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        
+        // Handle Tables
+        if (trimmed.startsWith('|') && (trimmed.endsWith('|') || trimmed.includes('|'))) {
             if (!inTable) {
                 inTable = true;
                 tableHtml = '<div class="table-container"><table class="rendered-table">';
             }
-            const cells = trimmed.split('|').slice(1, -1);
-            if (trimmed.includes('---')) {
-                // Skip separator line
-                continue;
+            if (trimmed.includes('---')) continue;
+            
+            const cells = trimmed.split('|').filter((_, i, a) => i > 0 && i < a.length - 1);
+            if (cells.length > 0) {
+                tableHtml += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
             }
-            tableHtml += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
-        } else {
-            if (inTable) {
-                tableHtml += '</table></div>';
-                finalHtml += tableHtml;
-                inTable = false;
-                tableHtml = '';
-            }
-            // Add as paragraph if not empty and not already a header
-            if (trimmed && !trimmed.startsWith('<h')) {
-                finalHtml += `<p>${trimmed}</p>`;
-            } else {
+            continue;
+        } 
+        
+        // Finalize Table if active
+        if (inTable) {
+            tableHtml += '</table></div>';
+            finalHtml += tableHtml;
+            inTable = false;
+            tableHtml = '';
+        }
+
+        // Handle Headers (Already replaced) or Paragraphs
+        if (trimmed) {
+            if (trimmed.startsWith('<h')) {
                 finalHtml += trimmed;
+            } else {
+                finalHtml += `<p>${trimmed}</p>`;
             }
+        } else {
+            finalHtml += '<br/>';
         }
     }
-    if (inTable) finalHtml += tableHtml + '</table></div>';
     
+    if (inTable) finalHtml += tableHtml + '</table></div>';
     return finalHtml;
 }
 
