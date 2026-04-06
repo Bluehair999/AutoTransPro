@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTrans Pro - Ready for Action</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/league.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #0284c7;
+            --accent: #38bdf8;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        .reveal {
+            background: radial-gradient(circle at top left, #1e293b, #0f172a 70%);
+        }
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+            font-family: 'Pretendard', sans-serif;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+        .brand-text {
+            color: var(--primary);
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+        }
+        .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .feature-card {
+            background: var(--glass);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+        .tag {
+            font-size: 0.6em;
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 6px;
+            vertical-align: middle;
+            font-weight: 600;
+        }
+        .stat-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 40px;
+            font-size: 0.8em;
+            color: var(--accent);
+        }
+        .check-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.7em;
+        }
+        .check-list li::before {
+            content: "✓";
+            color: var(--primary);
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .check-list li {
+            margin-bottom: 10px;
+        }
+        .mb-2rem { margin-bottom: 2rem; }
+        .mt-50px { margin-top: 50px; }
+        .mt-100px { margin-top: 100px; }
+        .intro-desc { font-size: 0.8rem; opacity: 0.7; }
+        .flex-row-gap { display: flex; gap: 20px; margin-top: 40px; }
+        .flex-1 { flex: 1; }
+        .text-danger { color: #ef4444; }
+        .text-success { color: #10b981; }
+        .feature-box-wide {
+            background: var(--glass);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .font-06em { font-size: 0.6em; }
+        .font-05em { font-size: 0.5em; }
+        .font-065em { font-size: 0.65em; }
+        .flex-center-gap { display: flex; align-items: center; gap: 40px; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .glossary-card {
+            flex: 1;
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+        .mv-10px { margin: 10px 0; }
+        .opacity-06 { opacity: 0.6; }
+        .opacity-08 { opacity: 0.8; }
+        .align-stretch { align-items: stretch; }
+        .word-export-mock {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 0.5em;
+            border-left: 20px solid var(--primary);
+        }
+        .word-header {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .mt-20px { margin-top: 20px; }
+        .mb-30px { margin-bottom: 30px; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Slide 1 -->
+            <section>
+                <div class="mb-2rem"><i data-lucide="languages" size="64" color="#0ea5e9"></i></div>
+                <h1><span class="brand-text">AutoTrans Pro</span></h1>
+                <h3>철도 실무형 하이브리드 AI 번역 플랫폼 <span class="tag">Stable v1.2 (Hybrid)</span></h3>
+                <div class="mt-50px">
+                    <p class="intro-desc">OpenAI와 Google Gemini가 만나 철도 실무 고도화를 완료했습니다.</p>
+                    <small>제작: 철도4부</small>
+                </div>
+            </section>
+
+            <!-- Slide 2 -->
+            <section>
+                <h2>구축 배경: 실무적 문제 해결</h2>
+                <div class="flex-row-gap">
+                    <div class="feature-card flex-1">
+                        <h4 class="text-danger"><i data-lucide="x-circle"></i> 기존 범용 번역기</h4>
+                        <ul class="check-list">
+                            <li>PDF 도면/표 레이아웃 파괴</li>
+                            <li>철도 기술 용어(Terminology) 오역</li>
+                            <li>기밀 유출 우려 및 대용량 문서 불가</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card flex-1">
+                        <h4 class="text-success"><i data-lucide="check-circle"></i> AutoTrans Pro 솔루션</h4>
+                        <ul class="check-list">
+                            <li>원문 보존형 OCR 번역</li>
+                            <li>부서 전용 용칙(Glossary) 탑재</li>
+                            <li>보고서용 클린 WORD 결과물 생성</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3 -->
+            <section>
+                <h2>[기능 1] 통합 문서 처리 파이프라인</h2>
+                <p><small>포맷에 구애받지 않고 실무에서 쓰이는 모든 문서를 처리합니다.</small></p>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i data-lucide="file-text" color="#0ea5e9"></i>
+                        <h5>PDF & WORD (.docx)</h5>
+                        <p><small>복잡한 텍스트 기반 기술 문서를 페이지 단위로 정밀 파싱</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="image" color="#0ea5e9"></i>
+                        <h5>IMAGE & SCAN</h5>
+                        <p><small>스캔된 매뉴얼, 설계 도면, PNG/JPG 이미지의 글자 직접 번역</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4 -->
+            <section>
+                <h2>[기능 2] 엔지니어링 전용 OCR</h2>
+                <p><small>이미지 속에 숨은 기술 문맥을 AI Vision이 완벽히 인지합니다.</small></p>
+                <div class="feature-box-wide">
+                    <p class="highlight">Precision Vision Intelligence</p>
+                    <ul class="check-list font-06em">
+                        <li>도면 내 캡션, 표 내부 텍스트 100% 인식</li>
+                        <li>흐릿한 스캔본도 AI 보정 후 정확한 번역 수행</li>
+                        <li>원문-번역문을 좌우로 배치하여 기술 검토 효율 극대화</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 5 -->
+            <section>
+                <h2>[기능 3] 실시간 전역 용어집 관리</h2>
+                <p><small>부서의 전문성을 번역 엔진에 직접 주입합니다.</small></p>
+                <div class="flex-center-gap">
+                    <div class="flex-1 text-left">
+                        <ul class="check-list font-065em">
+                            <li><strong>용어 추출</strong>: 문서 내 핵심 기술어를 AI가 자동 선별</li>
+                            <li><strong>글로벌 동기화</strong>: 언제 어디서나 용어 추가/삭제 관리</li>
+                            <li><strong>일관성 확보</strong>: AI가 약속된 용어만 사용하여 오역 원천 차단</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card glossary-card">
+                        <i data-lucide="book-marked" size="48"></i>
+                        <h4 class="mv-10px">Global DB</h4>
+                        <div class="font-05em opacity-06">Railway Department 4 Asset</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6 -->
+            <section>
+                <h2>[기능 4] 투명한 사용량 대시보드</h2>
+                <p><small>진행 상황과 비용을 실시간으로 투명하게 공개합니다.</small></p>
+                <div class="feature-grid font-06em">
+                    <div class="feature-card">
+                        <i data-lucide="calculator"></i>
+                        <h5>정밀 과금 추적</h5>
+                        <p><small>OpenAI의 최신 요율을 적용하여 $0.0001 단위까지 정밀 예측 표기</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="shield-check" color="#10b981"></i>
+                        <h5>안정적 하이브리드 라우팅</h5>
+                        <p><small>기능별 최적 모델 자동 배정 및 통신 오류 시 가용 모델 즉시 폴백(Fallback)</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="database"></i>
+                        <h5>토큰 매칭 모니터링</h5>
+                        <p><small>현재 사용 중인 AI 모델(4o/Mini/Gemini)과 소모 토큰량 즉시 확인</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="zap"></i>
+                        <h5>High-Speed Cache</h5>
+                        <p><small>동일 문장 번역 시 캐시를 사용하여 비용 0원, 속도는 즉각 대응</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7 -->
+            <section>
+                <h2>[기능 5] 윈도우 네이티브 익스포트</h2>
+                <p><small>웹 서비스의 불편함을 없애고 윈도우 앱처럼 동작합니다.</small></p>
+                <div class="flex-row-gap align-stretch">
+                    <div class="feature-card flex-1">
+                        <i data-lucide="folder-search"></i>
+                        <h5>표준 저장 대화상자</h5>
+                        <p><small>임의 경로 다운로드가 아닌, 윈도우 탐색기(Save As)에서 직접 파일명과 형식 선택</small></p>
+                    </div>
+                    <div class="feature-card flex-1">
+                        <i data-lucide="file-check-2"></i>
+                        <h5>다양한 성과품 규격</h5>
+                        <p><small>워드(.doc), 하이퍼텍스트(.html), 텍스트(.txt) 등 보고용 포맷 최적화</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8 -->
+            <section>
+                <h2>[기능 6] 클린 워드(WORD) 성과품</h2>
+                <p><small>더 이상의 후작업은 필요 없습니다. 바로 제출하세요.</small></p>
+                <div class="word-export-mock">
+                    <div class="text-right color-666">제작: 철도4부</div>
+                    <h2 class="word-header">번역 프로젝트 보고서</h2>
+                    <p class="mt-20px">[한글 번역이 완료된 텍스트가 문단별로 정 위치에 배치됨]</p>
+                    <p>● <strong>줄바꿈 유지</strong>: 워드 규격(<p>)에 맞춘 자동 포맷팅</p>
+                    <p>● <strong>클린 레이아웃</strong>: 불필요한 대조용 원문을 제거한 최종 성과물</p>
+                    <p>● <strong>보고용 최적화</strong>: 맑은 고딕, 줄 간격 정밀 조정</p>
+                </div>
+            </section>
+
+            <!-- Slide 9 -->
+            <section>
+                <h2>[기능 7] 사용자 편의 기능</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i data-lucide="monitor-check"></i>
+                        <h5>Real-time Sync</h5>
+                        <p><small>설정 변경 즉시 대시보드에 반영되는 인터렉티브 UI</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="sun-moon"></i>
+                        <h5>Dark/Light Mode</h5>
+                        <p><small>야간 업무를 위한 눈이 편안한 다크 테마 완벽 지원</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="smartphone"></i>
+                        <h5>Mobile Responsive</h5>
+                        <p><small>모바일/태블릿에서도 끊김 없는 번역 결과 모니터링</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="trash-2"></i>
+                        <h5>Smart Reset</h5>
+                        <p><small>프로젝트 기록 및 용어집의 안전한 영구 삭제 기능</small></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10 -->
+            <section>
+                <h2>[기능 8] 엔터프라이즈급 표준 아키텍처</h2>
+                <p><small>단순한 번역기를 넘어, 부서의 기술 자산을 관리하는 탄탄한 기반을 갖췄습니다.</small></p>
+                <div class="feature-grid font-06em grid-3">
+                    <div class="feature-card">
+                        <i data-lucide="code-2" color="#38bdf8"></i>
+                        <h5>웹 표준 & 규격 준수</h5>
+                        <p><small>인라인 스타일을 배제한 클린 아키텍처로 유지보수성 극대화</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="eye" color="#38bdf8"></i>
+                        <h5>웹 접근성(A11y) 강화</h5>
+                        <p><small>시각 장애인 및 보조 공학 기기를 위한 접근성 표준(Title/Label) 반영</small></p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="server" color="#38bdf8"></i>
+                        <h5>무손실 데이터 관리</h5>
+                        <p><small>프로젝트별 개별 캐시 및 용어집의 체계적 물리 분리 보관</small></p>
+                    </div>
+                </div>
+                <div class="mt-50px">
+                    <div class="stat-badge">Professional Certification Ready</div>
+                </div>
+            </section>
+
+            <!-- Slide 11 -->
+            <section data-background-color="#0ea5e9">
+                <i data-lucide="award" size="80" color="#fff" class="mb-30px"></i>
+                <h2>Professional Finalized</h2>
+                <p>AutoTrans Pro는 기술적 안정성과 설계적 완성도를 모두 갖춘 준비된 도구입니다.</p>
+                <div class="mt-100px font-06em opacity-08">철도4부의 기술력이 실무의 미래를 만듭니다.</div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            center: true,
+            transition: 'slide'
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>
