@@ -95,10 +95,11 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
           const base64 = fs.readFileSync(file.path).toString('base64');
           let result;
           
+          const targetLanguage = options.targetLangLabel || options.targetLang || 'Korean';
           if (options.model && options.model.startsWith('gemini-')) {
-            result = await translator.translateImageWithGemini(base64, options.targetLangLabel || 'Korean', options.geminiApiKey, options);
+            result = await translator.translateImageWithGemini(base64, targetLanguage, options.geminiApiKey, options);
           } else {
-            result = await translator.translateImage(base64, options.targetLangLabel || 'Korean', options);
+            result = await translator.translateImage(base64, targetLanguage, options);
           }
           
           // 원문 텍스트 추출 보강 (AI가 다른 키를 쓸 경우 대비)
@@ -247,13 +248,15 @@ async function processSinglePage(project, file, page, options) {
         const activeModel = options.model || (file.pages && file.pages.length > 5 ? 'gpt-4o-mini' : 'gpt-4o');
         
         let translation;
+        const targetLanguage = options.targetLangLabel || options.targetLang || 'Korean';
+        
         if (activeModel.startsWith('gemini-')) {
             translation = await translator.translateWithGemini(
-                text, 'auto', options.targetLangLabel || 'Korean', options.geminiApiKey, { ...options, glossary: projectGlossary, model: activeModel }
+                text, 'auto', targetLanguage, options.geminiApiKey, { ...options, glossary: projectGlossary, model: activeModel }
             );
         } else {
             translation = await translator.translateText(
-                text, 'auto', options.targetLangLabel || 'Korean', options.apiKey, { ...options, glossary: projectGlossary, model: activeModel }
+                text, 'auto', targetLanguage, options.apiKey, { ...options, glossary: projectGlossary, model: activeModel }
             );
         }
 
@@ -490,7 +493,8 @@ async function processGlobalVocabulary(project, file, units, options) {
     // 워커 풀을 사용하여 배치 번역 (병렬 처리)
     await runInPool(batches, 5, async (batch) => {
         if (project.stopRequested) return;
-        const result = await translator.translateBulkUnits(batch, 'auto', options.targetLangLabel || 'Korean', options.apiKey, options);
+        const targetLanguage = options.targetLangLabel || options.targetLang || 'Korean';
+        const result = await translator.translateBulkUnits(batch, 'auto', targetLanguage, options.apiKey, options);
         
         // [추가] 배치 결과 검증 로그
         const resultCount = Object.keys(result.map).length;

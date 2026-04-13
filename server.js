@@ -98,6 +98,10 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
     
     taskQueue.set(batchId, project);
     
+    // [수정] 언어 코드(en, ko)를 사람이 읽을 수 있는 이름(English, Korean)으로 변환
+    const langMap = { 'ko': 'Korean', 'en': 'English', 'ja': 'Japanese', 'zh': 'Chinese', 'pl': 'Polish', 'es': 'Spanish', 'auto': 'Auto Detect' };
+    const targetLangCode = req.body.targetLang || 'ko';
+    
     // Trigger processing asynchronously
     const options = {
       apiKey: req.body.apiKey,
@@ -105,7 +109,8 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
       model: req.body.model,
       tone: req.body.tone,
       srcLang: req.body.srcLang || 'auto',
-      targetLang: req.body.targetLang || 'Korean'
+      targetLang: targetLangCode,
+      targetLangLabel: langMap[targetLangCode] || 'Korean' // [추가] 큐 매니저에서 사용할 레이블
     };
     
     queue.startProcessing(project, taskQueue, outputDir, options).catch(err => {
