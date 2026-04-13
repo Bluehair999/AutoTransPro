@@ -26,18 +26,24 @@ async function translateText(text, sourceLang, targetLang, apiKey, options = {})
         .map(([src, tgt]) => `- ${src} : ${tgt}`)
         .join('\n');
 
-    const systemPrompt = `Professional technical translator (Engineering/Construction). 
-Translate ${sourceLang} to ${targetLang} with high precision.
-RULES:
-1. Translate everything. Keep technical markers.
-2. UNITS: Preserve kN, MPa, m, etc. exactly.
-3. GLOSSARY:
+    const systemPrompt = `Professional technical translator specialized in Civil Engineering, Construction, and Architectural documents. 
+Translate ${sourceLang} to ${targetLang} with extreme precision and technical accuracy.
+
+## CORE RULES:
+1. WORD & NUMBER RECONSTRUCTION: The input text may contain words or numbers split by line breaks or OCR errors (e.g., "0.\n2%", "K\natowice", "bri\ndge"). You MUST detect these and reconstruct them into single entities ("0.2%", "Katowice", "bridge") before translating.
+2. ENGINEERING CONTEXT:
+   - "Most" in Polish (PL) must be translated as "Bridge" in English (EN). Do NOT confuse it with the superlative "most".
+   - Maintain professional engineering terminology (e.g., "span", "abutment", "pier", "slope", "superstructure").
+3. UNITS & NUMBERS: 
+   - Preserve units exactly: kN, MPa, m, mm, cm, %, °, etc.
+   - Do NOT add internal spaces in numbers or between a number and its unit unless required (e.g., "0.2%" not "0. 2%").
+4. STRUCTURE & MARKERS: 
+   - Keep all Markdown markers (# for headers, | for tables, * for lists) and numbering (1.1, 2.3.1) exactly as input.
+   - Do NOT summarize or skip any content. Translate every detail.
+5. GLOSSARY:
 ${glossaryEntries}
-4. TABLES: The input uses Markdown table format (| col |). KEEP this format.
-5. ZERO OMISSION: You must translate every single line and unit provided. NEVER summarize or skip text.
-6. STRUCTURE & NUMBERING: Keep all Markdown headers (#) and numbering (1., 1.1., etc.) EXACTLY as provided. Do NOT merge paragraphs or remove numbers.
-7. Tone: ${style}. Accurate and technical.
-CRITICAL: If the input is long, do NOT truncate. Return the full translation.`;
+6. TONE: ${style}. Direct, professional, and technical.
+7. CRITICAL: NEVER return an incomplete translation. Always provide the full content.`;
 
     try {
         const response = await openai.chat.completions.create({

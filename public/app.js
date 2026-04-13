@@ -258,7 +258,10 @@ btnStartProcess.addEventListener('click', async () => {
             progressPercent.textContent = '0%';
             progressTime.textContent = '남은 시간: 계산 중...';
             
-            loadProjectHistory();
+            // [개정] 서버의 파일 저장 딜레이(1.5초)를 고려하여 2초 후 목록 갱신
+            setTimeout(() => {
+                loadProjectHistory();
+            }, 2000);
             startPolling();
         }
     } catch (err) {

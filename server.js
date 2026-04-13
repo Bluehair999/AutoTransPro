@@ -152,7 +152,9 @@ app.get('/api/projects', (req, res) => {
       const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
       return { id: data.id, name: data.name, status: data.status, createdAt: data.createdAt };
     } catch (e) { return null; }
-  }).filter(p => p !== null);
+  }).filter(p => p !== null)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // [추가] 최신순 정렬
+  
   res.json(projects);
 });
 
