@@ -84,6 +84,7 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
     const project = {
       id: batchId,
       name: req.body.projectName || 'New Project',
+      ownerId: req.body.ownerId || 'unknown',
       files: files.map(f => ({
         id: uuidv4(),
         originalName: f.originalname,
@@ -145,14 +146,15 @@ app.get('/api/status/:batchId', (req, res) => {
 
 app.get('/api/projects', (req, res) => {
   const dir = path.join(__dirname, 'projects');
+  const ownerId = req.query.ownerId;
   if (!fs.existsSync(dir)) return res.json([]);
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));
   const projects = files.map(f => {
     try {
       const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-      return { id: data.id, name: data.name, status: data.status, createdAt: data.createdAt };
+      return { id: data.id, name: data.name, status: data.status, createdAt: data.createdAt, ownerId: data.ownerId };
     } catch (e) { return null; }
-  }).filter(p => p !== null)
+  }).filter(p => p !== null && (!ownerId || p.ownerId === ownerId))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // [추가] 최신순 정렬
   
   res.json(projects);
@@ -170,10 +172,19 @@ app.post('/api/projects/delete/:id', (req, res) => {
 
 app.post('/api/projects/clear', (req, res) => {
   const dir = path.join(__dirname, 'projects');
+  const ownerId = req.body.ownerId;
   if (fs.existsSync(dir)) {
     const files = fs.readdirSync(dir);
     for (const file of files) {
-      if (file.endsWith('.json')) fs.unlinkSync(path.join(dir, file));
+      if (file.endsWith('.json')) {
+        const filePath = path.join(dir, file);
+        try {
+          const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          if (!ownerId || data.ownerId === ownerId) {
+            fs.unlinkSync(filePath);
+          }
+        } catch(e) {}
+      }
     }
   }
   res.json({ success: true });

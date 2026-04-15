@@ -54,6 +54,12 @@ let pollingInterval = null;
 let currentPageIndex = 0;
 let modalDismissedForProject = null; // Track dismissed status per project
 
+let ownerId = localStorage.getItem('autotrans_ownerId');
+if (!ownerId) {
+    ownerId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('autotrans_ownerId', ownerId);
+}
+
 // Modal Logic
 btnUploadTrigger.addEventListener('click', () => modalUpload.classList.add('active'));
 btnCancelUpload.addEventListener('click', () => {
@@ -238,6 +244,7 @@ btnStartProcess.addEventListener('click', async () => {
         formData.append('srcLang', srcLangSelect.value);
         formData.append('targetLang', targetLangSelect.value);
         formData.append('isOcr', isOcrMode);
+        formData.append('ownerId', ownerId);
 
         const response = await fetch('/api/upload', {
             method: 'POST',
@@ -275,7 +282,11 @@ btnStartProcess.addEventListener('click', async () => {
 
 async function convertPdfToImages(file) {
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+    const pdf = await pdfjsLib.getDocument({
+        data: arrayBuffer,
+        cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/',
+        cMapPacked: true
+    }).promise;
     const images = [];
     
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -738,7 +749,11 @@ function loadTheme() {
 btnResetAll.addEventListener('click', async () => {
     if (!confirm('모든 프로젝트 내역이 삭제됩니다. 계속하시겠습니까?')) return;
     try {
-        await fetch('/api/projects/clear', { method: 'POST' });
+        await fetch('/api/projects/clear', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ownerId })
+        });
         location.reload();
     } catch (err) {
         alert('초기화 실패');
@@ -778,7 +793,7 @@ function updateSidebarModelDisplay() {
 
 async function loadProjectHistory() {
     try {
-        const response = await fetch('/api/projects');
+        const response = await fetch(`/api/projects?ownerId=${ownerId}`);
         const projects = await response.json();
         const projectHistory = document.getElementById('project-history');
         projectHistory.innerHTML = projects.map(p => `
