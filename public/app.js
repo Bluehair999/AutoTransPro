@@ -457,6 +457,20 @@ function updateUI(project) {
     jobStatusBadge.textContent = project.status === 'completed' ? '완료' : (project.status === 'stopped' ? '중단됨' : (project.status === 'failed' ? '결과 오류' : '처리 중...'));
     jobStatusBadge.className = `badge ${project.status}`;
 
+    // [추가] 상단 언어 정보 표시
+    const langDisplay = document.getElementById('project-lang-display');
+    if (langDisplay) {
+        const langMap = { 'ko': '한국어', 'en': '영어', 'ja': '일본어', 'zh': '중국어', 'pl': '폴란드어', 'es': '스페인어', 'auto': '자동 감지' };
+        const src = langMap[project.srcLang] || project.srcLang || '자동 감지';
+        const tgt = langMap[project.targetLang] || project.targetLang || '한국어';
+        langDisplay.innerHTML = `
+            <span class="lang-text">${src}</span>
+            <i data-lucide="arrow-right"></i>
+            <span class="lang-text">${tgt}</span>
+        `;
+        lucide.createIcons();
+    }
+
     // Flatten all pages across all files for navigation
     const allPages = project.files.flatMap(file => 
         file.pages.map(page => ({ ...page, fileStatus: file.status }))

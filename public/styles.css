@@ -254,6 +254,14 @@ body {
   color: var(--primary);
 }
 
+.method-badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .api-minimal-input {
   display: flex;
   align-items: center;
@@ -262,6 +270,33 @@ body {
   padding: 0.25rem 0.6rem;
   border-radius: 20px;
   border: 1px solid var(--border);
+}
+
+.lang-display-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-dark);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+body.light-mode .lang-display-badge {
+    background: #e2e8f0;
+}
+
+.lang-display-badge .lang-text {
+    color: var(--primary);
+}
+
+.lang-display-badge i {
+    width: 14px;
+    height: 14px;
 }
 
 .api-minimal-input input {

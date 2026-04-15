@@ -88,15 +88,25 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
       id: batchId,
       name: req.body.projectName || 'New Project',
       ownerId: req.body.ownerId || 'unknown',
-      files: files.map(f => ({
-        id: uuidv4(),
-        originalName: f.originalname,
-        path: f.path,
-        mimetype: f.mimetype || (f.originalname.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/octet-stream'),
-        status: 'pending',
-        pages: []
-      })),
+      files: files.map(f => {
+        const ext = path.extname(f.originalname).toLowerCase();
+        let finalMime = f.mimetype;
+        if (ext === '.pdf') finalMime = 'application/pdf';
+        else if (ext === '.docx' || ext === '.doc') finalMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) finalMime = 'image/jpeg';
+        
+        return {
+          id: uuidv4(),
+          originalName: f.originalname,
+          path: f.path,
+          mimetype: finalMime || 'application/octet-stream',
+          status: 'pending',
+          pages: []
+        };
+      }),
       status: 'pending',
+      srcLang: req.body.srcLang || 'auto',
+      targetLang: req.body.targetLang || 'ko',
       createdAt: new Date()
     };
     
