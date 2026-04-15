@@ -458,8 +458,13 @@ function updateUI(project) {
     document.getElementById('current-page-num').textContent = currentPageIndex + 1;
 
     const page = allPages[currentPageIndex];
+    const sourceContent = document.getElementById('source-content');
+    const targetContent = document.getElementById('target-content');
+
     if (!page) {
-        pagesContainer.innerHTML = '<div class="welcome-screen">표시할 데이터가 없습니다.</div>';
+        if (sourceContent) sourceContent.innerHTML = '<div class="welcome-screen" style="color:#ef4444;"><i data-lucide="alert-circle" size="48"></i><h2>문서를 분석할 수 없습니다</h2><p>해당 문서가 스캔본이거나 지원하지 않는 형식(예: HWP)일 수 있습니다. PDF 또는 DOCX로 변환 후 업로드해 주세요.</p></div>';
+        if (targetContent) targetContent.innerHTML = '';
+        lucide.createIcons();
         return;
     }
 
