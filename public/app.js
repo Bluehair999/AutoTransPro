@@ -353,6 +353,14 @@ function startPolling() {
                     
                     // 완료 레이블 업데이트
                     if (progressStatus) progressStatus.textContent = "모든 문서가 성공적으로 번역되었습니다.";
+                } else if (project.status === 'failed') {
+                    progressTitle.textContent = "작업 실패";
+                    progressIcon.innerHTML = '<i data-lucide="x-circle" color="#ef4444" size="40"></i>';
+                    progressRunningActions.style.display = 'none';
+                    progressCompleteActions.style.display = 'block';
+                    progressCompleteActions.style.opacity = '1';
+                    progressCompleteActions.style.transform = 'translateY(0)';
+                    if (progressStatus) progressStatus.textContent = "문서 처리 중 심각한 오류가 발생했습니다. (.doc 등 미지원 파일일 수 있습니다.)";
                 }
                 
                 lucide.createIcons();
@@ -446,7 +454,7 @@ function updateUI(project) {
         lucide.createIcons();
     }
     
-    jobStatusBadge.textContent = project.status === 'completed' ? '완료' : (project.status === 'stopped' ? '중단됨' : '처리 중...');
+    jobStatusBadge.textContent = project.status === 'completed' ? '완료' : (project.status === 'stopped' ? '중단됨' : (project.status === 'failed' ? '결과 오류' : '처리 중...'));
     jobStatusBadge.className = `badge ${project.status}`;
 
     // Flatten all pages across all files for navigation

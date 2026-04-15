@@ -175,7 +175,9 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
         storage.saveProject(project);
       }
       
-      file.status = file.pages.every(p => p.status === 'completed' || p.status === 'skipped') ? 'completed' : 'failed';
+      if (file.status !== 'failed') {
+          file.status = file.pages.length > 0 && file.pages.every(p => p.status === 'completed' || p.status === 'skipped') ? 'completed' : 'failed';
+      }
       project.usage.duration = Math.floor((Date.now() - project.usage.startTime) / 1000);
       storage.saveProject(project);
     } catch (err) {
