@@ -483,8 +483,7 @@ function updateUI(project) {
     const finalTrans = cleanTrans.includes('|') ? markdownTableToHtml(cleanTrans) : cleanTrans;
     const finalOrig = cleanOrig.includes('|') ? markdownTableToHtml(cleanOrig) : cleanOrig;
 
-    const sourceContent = document.getElementById('source-content');
-    const targetContent = document.getElementById('target-content');
+
 
     if (sourceContent && targetContent) {
         // [추가] 페이지 전환 시 스크롤 위치 초기화 (상단 정렬)
