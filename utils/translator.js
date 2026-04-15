@@ -27,23 +27,23 @@ async function translateText(text, sourceLang, targetLang, apiKey, options = {})
         .join('\n');
 
     const systemPrompt = `Professional technical translator specialized in Civil Engineering, Construction, and Architectural documents. 
-Translate ${sourceLang} to ${targetLang} with extreme precision and technical accuracy.
+Translate from [${sourceLang}] to [${targetLang}] with extreme precision and technical accuracy.
 
 ## CORE RULES:
-1. WORD & NUMBER RECONSTRUCTION: The input text may contain words or numbers split by line breaks or OCR errors (e.g., "0.\n2%", "K\natowice", "bri\ndge"). You MUST detect these and reconstruct them into single entities ("0.2%", "Katowice", "bridge") before translating.
-2. ENGINEERING CONTEXT:
-   - "Most" in Polish (PL) must be translated as "Bridge" in English (EN). Do NOT confuse it with the superlative "most".
-   - Maintain professional engineering terminology (e.g., "span", "abutment", "pier", "slope", "superstructure").
-3. UNITS & NUMBERS: 
+1. TARGET LANGUAGE: You MUST output the translation in [${targetLang}]. Never switch to English unless it is the requested target language.
+2. WORD & NUMBER RECONSTRUCTION: The input text may contain words or numbers split by line breaks or OCR errors (e.g., "0.\n2%", "K\natowice", "bri\ndge"). You MUST detect these and reconstruct them into single entities ("0.2%", "Katowice", "bridge") before translating.
+3. ENGINEERING CONTEXT:
+   - Maintain professional engineering terminology (e.g., "bridge", "span", "abutment", "pier", "slope", "superstructure") correctly translated into [${targetLang}].
+4. UNITS & NUMBERS: 
    - Preserve units exactly: kN, MPa, m, mm, cm, %, °, etc.
    - Do NOT add internal spaces in numbers or between a number and its unit unless required (e.g., "0.2%" not "0. 2%").
-4. STRUCTURE & MARKERS: 
+5. STRUCTURE & MARKERS: 
    - Keep all Markdown markers (# for headers, | for tables, * for lists) and numbering (1.1, 2.3.1) exactly as input.
    - Do NOT summarize or skip any content. Translate every detail.
-5. GLOSSARY:
+6. GLOSSARY:
 ${glossaryEntries}
-6. TONE: ${style}. Direct, professional, and technical.
-7. CRITICAL: NEVER return an incomplete translation. Always provide the full content.`;
+7. TONE: ${style}. Direct, professional, and technical.
+8. CRITICAL: Provide the full translation in [${targetLang}] ONLY.`;
 
     try {
         const response = await openai.chat.completions.create({
@@ -135,13 +135,16 @@ async function translateWithGemini(text, sourceLang, targetLang, apiKey, options
         .join('\n');
 
     const prompt = `You are a professional technical document translator.
-Translate the following text from ${sourceLang} to ${targetLang} with precision.
-GLOSSARY:
+Translate the following text from [${sourceLang}] into [${targetLang}] with precision.
+
+## RULES:
+1. TARGET LANGUAGE: You MUST output the translation in [${targetLang}] ONLY. Never switch to English unless it is the requested target language.
+2. ZERO OMISSION: Translate every single word. Never summarize.
+3. Preserve technical formatting and units.
+4. GLOSSARY:
 ${glossaryEntries}
-STYLE: ${style}
-RULES:
-1. ZERO OMISSION: Translate every single word. Never summarize.
-2. Preserve technical formatting and units.
+5. STYLE: ${style}
+
 TEXT TO TRANSLATE:
 ${text}`;
 
@@ -196,7 +199,10 @@ async function translateImageWithGemini(base64Image, targetLang = 'Korean', apiK
     const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent?key=${apiKey}`;
 
     const prompt = `Extract all text from this image and translate it into [${targetLang}]. 
-    Return the result as a JSON object with:
+
+## RULES:
+1. TARGET LANGUAGE: You MUST output the translation in [${targetLang}] ONLY.
+2. Return the result as a JSON object with:
     {
       "original": "The extracted text in original language",
       "translated": "The translated text in ${targetLang}"
@@ -269,17 +275,20 @@ async function translateBulkUnits(unitList, sourceLang, targetLang, apiKey, opti
     const humanLang = langMap[targetLang] || targetLang;
 
     const systemPrompt = `You are a professional technical translator.
-Translate the following numbered units from ${sourceLang} into [${humanLang}]. 
-RULES:
-1. Return EXACTLY the same number of units.
-2. Format: [[number]] Translation
-3. Do not add any conversational text.
-4. If a unit is already in ${humanLang}, return it as is.
-5. ZERO OMISSION: You must translate every single unit provided. Do NOT skip items.
-6. NUMBERING: If a unit contains a chapter number (e.g., 1.1.1), PRESERVE it at the start of the translation.
-7. GLOSSARY:
+Translate the following numbered units from [${sourceLang}] into [${humanLang}]. 
+
+## RULES:
+1. TARGET LANGUAGE: Everything MUST be translated into [${humanLang}].
+2. Return EXACTLY the same number of units.
+3. Format: [[number]] Translation
+4. Do not add any conversational text.
+5. If a unit is already in [${humanLang}], return it as is.
+6. ZERO OMISSION: You must translate every single unit provided. Do NOT skip items.
+7. NUMBERING: If a unit contains a chapter number (e.g., 1.1.1), PRESERVE it at the start of the translation.
+8. GLOSSARY:
 ${glossaryEntries}
-8. STYLE: ${style}`;
+9. STYLE: ${style}
+10. CRITICAL: Do NOT output English if the target is [${humanLang}].`;
 
     const openai = getOpenAIClient(apiKey);
     
