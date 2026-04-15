@@ -41,6 +41,9 @@ app.post('/api/tm/update', (req, res) => {
 
 const PORT = process.env.PORT || 3008;
 
+// Render Auto-Wake Mode endpoint
+app.get('/api/ping', (req, res) => res.json({ status: 'awake', time: new Date() }));
+
 // Basic storage setup
 const uploadDir = path.join(__dirname, process.env.UPLOAD_DIR || 'uploads');
 const outputDir = path.join(__dirname, process.env.OUTPUT_DIR || 'outputs');
@@ -192,6 +195,18 @@ app.post('/api/projects/clear', (req, res) => {
 
 const appServer = app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+
+  // Render Auto-Wake Mode: 14분마다 스스로를 호출하여 수면 방지
+  const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.HOST_URL;
+  if (RENDER_URL) {
+    console.log(`Auto-Wake Mode Enabled for URL: ${RENDER_URL}`);
+    setInterval(() => {
+      const http = RENDER_URL.startsWith('https') ? require('https') : require('http');
+      http.get(`${RENDER_URL}/api/ping`, (res) => {
+        console.log(`[Auto-Wake] Ping successful. Status: ${res.statusCode}`);
+      }).on('error', (err) => console.error(`[Auto-Wake] Ping failed:`, err.message));
+    }, 14 * 60 * 1000); // 14 minutes
+  }
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`Port ${PORT} is already in use. Please close other servers.`);
