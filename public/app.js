@@ -609,6 +609,7 @@ btnExportMain.addEventListener('click', async () => {
                 types: [
                     { description: 'Text File', accept: { 'text/plain': ['.txt'] } },
                     { description: 'HTML Document', accept: { 'text/html': ['.html'] } },
+                    { description: 'Word Document', accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] } },
                     { description: 'Word Document (Legacy)', accept: { 'application/msword': ['.doc'] } },
                 ],
             });
@@ -618,8 +619,15 @@ btnExportMain.addEventListener('click', async () => {
             const ext = file.name.split('.').pop().toLowerCase();
             
             let content = '';
-            if (ext === 'txt') content = generateTxtContent();
-            else if (ext === 'html' || ext === 'doc') content = generateHtmlContent(ext === 'doc');
+            if (ext === 'txt') {
+                content = generateTxtContent();
+            } else if (ext === 'html') {
+                content = generateHtmlContent(false);
+            } else if (ext === 'docx') {
+                content = htmlDocx.asBlob(generateHtmlContent(true));
+            } else if (ext === 'doc') {
+                content = generateHtmlContent(true);
+            }
             
             await writable.write(content);
             await writable.close();
