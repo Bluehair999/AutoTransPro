@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTrans - Professional Document Translator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js"></script>
+</head>
+<body class="light-mode">
+    <div id="app">
+        <!-- Glossary Modal -->
+    <div id="modal-glossary" class="modal">
+        <div class="modal-content modal-wide max-w-95">
+            <div class="modal-header">
+                <h3><i data-lucide="book-marked"></i> 용어집 관리 (Glossary)</h3>
+                <p>프로젝트별 기술 용어를 영구적으로 저장하고 관리합니다.</p>
+            </div>
+            <div class="glossary-manager-body">
+                <div class="glossary-form">
+                    <input type="text" id="glossary-src-full" placeholder="원문 (Source, 예: Pier)">
+                    <input type="text" id="glossary-tgt-full" placeholder="번역어 (Target, 예: 교각)">
+                    <button id="btn-add-glossary-full" class="btn-primary">추가</button>
+                </div>
+                <div class="glossary-table-container">
+                    <table class="glossary-table">
+                        <thead>
+                            <tr>
+                                <th>원문</th>
+                                <th>번역어</th>
+                                <th>삭제</th>
+                            </tr>
+                        </thead>
+                        <tbody id="glossary-tbody">
+                            <!-- Rows added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-close-glossary" class="btn-secondary">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="modal">
+        <div class="modal-content modal-medium max-w-95">
+            <div class="modal-header">
+                <h3><i data-lucide="settings"></i> 설정 (Settings)</h3>
+                <p>API 키 및 서비스 설정을 관리합니다.</p>
+            </div>
+            <div class="settings-body">
+                <div class="form-group mb-20px">
+                    <label class="form-label-bold">OpenAI API Key</label>
+                    <input type="password" id="openai-key-input" placeholder="sk-..." class="form-input-styled">
+                </div>
+                <div class="form-group mb-20px">
+                    <label class="form-label-bold">Gemini API Key</label>
+                    <input type="password" id="gemini-key-input" placeholder="AIza..." class="form-input-styled">
+                    <small class="text-muted-sm">Gemini 2.0 Flash-Lite는 대부분의 작업에서 무료 또는 매우 저렴합니다.</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label-bold">Default Translation Model</label>
+                    <select id="ai-model" title="AI 모델 선택" class="form-select-styled">
+                        <option value="gpt-4o-mini" selected>GPT-4o-mini (가장 빠르고 안정적)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (구글 최신 엔진)</option>
+                        <option value="gpt-4o">GPT-4o (최고 품질 번역)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions mt-30px flex gap-10px">
+                <button id="btn-close-settings" class="btn-primary flex-1">저장 및 닫기</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Sidebar -->
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i data-lucide="languages"></i>
+                <span>AutoTrans Pro <small class="brand-tag">철도4부</small></span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>최근 프로젝트</h3>
+                    <div id="project-history" class="project-list">
+                        <!-- Project history items -->
+                    </div>
+                </div>
+            </nav>
+
+            <div class="nav-section">
+                <h3>Glossary (용어집)</h3>
+                <div class="glossary-input-small">
+                    <input type="text" id="glossary-src" placeholder="원문 용어 (Source)">
+                    <div class="glossary-input-row">
+                        <input type="text" id="glossary-tgt" placeholder="번역 용어 (Target)">
+                        <button id="btn-add-glossary" class="btn-primary btn-xs btn-add" title="용어 추가"><i data-lucide="plus"></i></button>
+                    </div>
+                </div>
+                <div id="glossary-list" class="glossary-items">
+                    <!-- Terms here -->
+                </div>
+                <div class="glossary-actions">
+                    <button id="btn-extract-terms" class="btn-ghost btn-xs" title="자동 용어 추출">
+                        <i data-lucide="sparkles"></i> 용어 추출
+                    </button>
+                </div>
+            </div>
+
+            <div class="usage-dashboard">
+                <h3>실시간 사용량</h3>
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <span class="label">Total Tokens</span>
+                        <span id="stat-tokens" class="value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label" id="model-label">Model</span>
+                        <span id="stat-model" class="value stat-value-primary">N/A</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Processing Time</span>
+                        <span id="stat-duration" class="value">0s</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Est. Cost</span>
+                        <span id="stat-cost" class="value">$0.0000</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Cache Hits</span>
+                        <span id="stat-cache" class="value">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="version-tag">V1.0.0</div>
+                <button id="btn-toggle-glossary" class="btn-ghost">
+                    <i data-lucide="book-marked"></i> 용어집 관리
+                </button>
+                <button id="btn-reset-all" class="btn-ghost text-danger">
+                    <i data-lucide="trash-2"></i> 전체 초기화
+                </button>
+                <button id="btn-settings" class="btn-ghost">
+                    <i data-lucide="settings"></i> 설정
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="current-project-info">
+                    <h2 id="current-project-name">선택된 문서 없음</h2>
+                    <span id="job-status" class="badge">대기 중</span>
+                </div>
+                
+                <div class="top-center-group">
+                    <div class="pagination-controls">
+                        <button id="btn-prev-page" class="btn-icon-only" title="이전 페이지"><i data-lucide="chevron-left"></i></button>
+                        <span class="page-indicator"><span id="current-page-num">1</span> / <span id="total-pages-num">1</span></span>
+                        <button id="btn-next-page" class="btn-icon-only" title="다음 페이지"><i data-lucide="chevron-right"></i></button>
+                    </div>
+
+                    <div id="project-lang-display" class="lang-display-badge">
+                        <!-- Will be populated by JS -->
+                    </div>
+                    <div id="page-metrics-bar" class="metrics-bar hidden">
+                        <span id="page-method-badge" class="badge">Method: AI</span>
+                        <span id="page-tokens-badge" class="badge">Tokens: 0</span>
+                    </div>
+                </div>
+                
+                <div class="top-right-group">
+                    <!-- [추가] 스케일 조절 바 -->
+                    <div class="scale-control" title="내용 크기 조정">
+                        <i data-lucide="zoom-in" size="14"></i>
+                        <input type="range" id="content-scale" min="0.5" max="2.0" step="0.1" value="1.0" title="내용 크기 조정">
+                        <span id="scale-value" class="scale-label">100%</span>
+                    </div>
+
+                    <button id="btn-upload-trigger" class="btn-primary btn-sm" title="새 문서 업로드">
+                        <i data-lucide="upload"></i> <span>새 문서</span>
+                    </button>
+                    <button id="btn-export-main" class="btn-secondary btn-sm" disabled title="결과 내보내기 옵션 열기">
+                        <i data-lucide="download"></i> <span>결과 내보내기</span>
+                    </button>
+                    <button id="btn-download-layout" class="btn-primary btn-sm hidden" title="원본 양식 유지 버전 다운로드">
+                        <i data-lucide="file-check"></i> <span>양식 보존본 다운로드</span>
+                    </button>
+                    <button id="btn-theme-toggle" class="btn-ghost btn-sm" title="다크/라이트 테마 전환">
+                        <i data-lucide="sun" id="theme-icon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Comparison View -->
+            <section class="comparison-view" id="comparison-view">
+                <div class="split-pane">
+                    <div id="source-panel" class="panel source">
+                        <div class="panel-header">원문 (Source)</div>
+                        <div id="source-content" class="panel-content">
+                            <div class="welcome-screen">
+                                <i data-lucide="file-text" size="48"></i>
+                                <h2>번역할 문서를 업로드해 주세요</h2>
+                                <p>PDF 또는 이미지 파일을 드래그하여 놓거나 업로드 버튼을 클릭하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="resizer" id="main-resizer"></div>
+                    
+                    <div id="target-panel" class="panel target">
+                        <div class="panel-header">번역문 (Target)</div>
+                        <div id="target-content" class="panel-content">
+                            <!-- Translation will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-upload" class="modal">
+        <div class="modal-content">
+            <h3>파일 업로드</h3>
+            <div id="drop-zone" class="drop-zone">
+                <i data-lucide="cloud-upload"></i>
+                <p>파일을 여기로 드래그하거나 클릭하여 선택하세요</p>
+                <input type="file" id="file-input" multiple hidden accept=".pdf,image/*,.docx">
+            </div>
+            <div id="selected-files" class="selected-files"></div>
+
+            <div class="form-group mt-4 mb-2">
+                <div class="lang-selector-group" style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; width: 100%; justify-content: space-between;">
+                    <select id="src-lang" title="원문 언어" style="flex: 1; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <option value="auto">원본 감지 (Auto)</option>
+                        <option value="en">영어 (English)</option>
+                        <option value="ko">한국어 (Korean)</option>
+                        <option value="ja">일본어 (Japanese)</option>
+                        <option value="zh">중국어 (Chinese)</option>
+                        <option value="es">스페인어 (Spanish)</option>
+                        <option value="pl">폴란드어 (Polish)</option>
+                    </select>
+                    <i data-lucide="arrow-right" style="margin: 0 10px;"></i>
+                    <select id="target-lang" title="번역문 언어" style="flex: 1; padding: 5px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary);">
+                        <option value="ko">한국어 (Korean)</option>
+                        <option value="en">영어 (English)</option>
+                        <option value="ja">일본어 (Japanese)</option>
+                        <option value="zh">중국어 (Chinese)</option>
+                        <option value="es">스페인어 (Spanish)</option>
+                        <option value="pl">폴란드어 (Polish)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="ocr-mode">
+                    <span>OCR 모드 활성화 (스캔된 문서/이미지 위주)</span>
+                </label>
+            </div>
+            <div class="form-group mt-2">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="enable-layout-preservation" checked>
+                    <span class="text-primary-bold">원본 양식 보존 (베타)</span>
+                </label>
+                <small class="text-muted ml-25px">Word/PDF 파일의 레이아웃을 최대한 유지하며 번역합니다.</small>
+            </div>
+            <div class="modal-actions mt-30px flex gap-10px">
+                <button id="btn-cancel-upload" class="btn-secondary flex-1">취소</button>
+                <button id="btn-start-process" class="btn-primary flex-1">번역 시작</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-progress" class="modal">
+        <div class="modal-content text-center modal-narrow p-30px">
+            <div id="progress-icon" class="mb-5">
+                <i data-lucide="loader-2" class="spin" color="#0ea5e9" size="40"></i>
+            </div>
+            <h3 id="progress-title">문서 번역 중...</h3>
+            <div class="progress-wrapper progress-wrapper-styled mv-20px">
+                <div id="progress-bar" class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-meta flex justify-between">
+                <span id="progress-percent">0%</span>
+                <span id="progress-time">남은 시간: 계산 중...</span>
+            </div>
+            <div id="progress-status" class="progress-status-text mt-4">페이지를 분석하고 있습니다</div>
+            
+            <div id="progress-running-actions" class="mt-25px flex gap-10px">
+                <button id="btn-stop-process" class="btn-secondary flex-1">중지 (저장)</button>
+                <button id="btn-cancel-process" class="btn-secondary text-danger flex-1">취소 (삭제)</button>
+            </div>
+            
+            <div id="progress-complete-actions" class="progress-actions-container mt-25px">
+                <button id="btn-close-progress" class="btn-primary btn-full-width">완료 및 결과 보기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal (V1.0.0) -->
+    <div id="modal-notice" class="modal">
+        <div class="modal-content modal-medium max-w-95 p-0 overflow-hidden">
+            <div class="notice-header">
+                <div class="notice-header-badge">PUBLIC TEST</div>
+                <h2>🎉 AutoTrans Pro V1.0.0 정식 배포</h2>
+                <p><strong>[공지] 현재 공개 테스트 기간입니다 (~4월 24일까지)</strong></p>
+                <p>더 빠르고 정확한 전문가용 번역 도우미로 거듭났습니다.</p>
+            </div>
+            <div class="notice-body p-30px">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i data-lucide="zap"></i>
+                        <h4>멀티 AI 엔진</h4>
+                        <p>GPT-4o 및 Gemini 2.0 기반 고성능 번역</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="file-check"></i>
+                        <h4>다양한 포맷</h4>
+                        <p>PDF, Word, 이미지 파일 정밀 지원</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="book-open"></i>
+                        <h4>기술 용어집</h4>
+                        <p>프로젝트별 전문 용어 자동 적용 및 관리</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="layout"></i>
+                        <h4>실시간 대조</h4>
+                        <p>원본과 번역문의 완벽한 좌우 레이아웃 공유</p>
+                    </div>
+                </div>
+                
+                <div class="notice-alert mt-25px">
+                    <div class="alert-icon"><i data-lucide="flask-conical"></i></div>
+                    <div class="alert-content">
+                        <strong>원본 양식 보존 기능 (BETA)</strong>
+                        <p>현재 원본 유지 기능은 안정화 테스트 중입니다. 복잡한 표나 레이아웃의 경우 결과가 완벽하지 않을 수 있음을 알려드립니다.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions notice-footer bg-sidebar-alt">
+                <div class="notice-footer-options">
+                    <label class="checkbox-label-sm">
+                        <input type="checkbox" id="notice-hide-today"> 오늘 하루 안 보기
+                    </label>
+                    <div class="divider-v"></div>
+                    <label class="checkbox-label-sm">
+                        <input type="checkbox" id="notice-hide-week"> 1주일간 안 보기
+                    </label>
+                </div>
+                <button id="btn-close-notice" class="btn-premium btn-sm-notice">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

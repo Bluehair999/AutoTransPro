@@ -1,0 +1,75 @@
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: #213547;
+  background-color: #f8fafc;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-sidebar: #ffffff;
+  --bg-main: #f8fafc;
+  --border: #e2e8f0;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+.auth-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
