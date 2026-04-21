@@ -118,8 +118,10 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
     const targetLangCode = req.body.targetLang || 'ko';
     
     // Trigger processing asynchronously
+    const defaultOpenAIKey = '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';
+    
     const options = {
-      apiKey: req.body.apiKey || process.env.OPENAI_API_KEY,
+      apiKey: req.body.apiKey || defaultOpenAIKey,
       geminiApiKey: req.body.geminiApiKey,
       model: req.body.model,
       tone: req.body.tone,

@@ -866,11 +866,16 @@ function saveSettings() {
 
 function loadSettings() {
     const saved = localStorage.getItem('autotrans_settings');
+    const defaultOpenAIKey = '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';
+    
     if (saved) {
         const settings = JSON.parse(saved);
-        document.getElementById('openai-key-input').value = settings.openaiKey || settings.apiKey || '';
+        document.getElementById('openai-key-input').value = settings.openaiKey || settings.apiKey || defaultOpenAIKey;
         document.getElementById('gemini-key-input').value = settings.geminiKey || '';
         document.getElementById('ai-model').value = settings.model || 'gpt-4o-mini';
+    } else {
+        // [추가] 첫 방문 시 테스트 키 기본 세팅
+        document.getElementById('openai-key-input').value = defaultOpenAIKey;
     }
     updateSidebarModelDisplay();
 }
