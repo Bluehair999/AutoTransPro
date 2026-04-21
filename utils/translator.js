@@ -91,6 +91,7 @@ async function translateBulkUnits(unitList, sourceLang, targetLang, apiKey, opti
     
     // Progress callback (optional)
     const onProgress = options.onProgress || (() => {});
+    const CHUNK_SIZE = options.chunkSize || 50;
 
     for (let i = 0; i < unitList.length; i += CHUNK_SIZE) {
         const chunk = unitList.slice(i, i + CHUNK_SIZE);
@@ -112,7 +113,7 @@ Translate the following numbered units from [${sourceLang}] into [${humanLang}].
 5. Do not add preamble. Use style: ${options.style || 'professional'}.`;
 
         const result = await translateText(combinedInput, sourceLang, targetLang, apiKey, { ...options, useRawPrompt: true });
-        const content = result.translatedText || '';
+        const content = result.content || '';
         
         const partialMap = parseBulkResults(content, chunk, i);
         Object.assign(finalMap, partialMap);
