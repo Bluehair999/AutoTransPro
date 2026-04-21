@@ -1183,10 +1183,9 @@ loadTheme();
 loadProjectHistory();
 lucide.createIcons();
 
-// [추가] V1.0.0 정식 배포 안내 팝업 로직 (강제 갱신 키 사용)
+// [추가] V1.0.0 정식 배포 안내 팝업 로직 (강제 공지 모드)
 const modalNotice = document.getElementById('modal-notice');
 const btnCloseNotice = document.getElementById('btn-close-notice');
-const NOTICE_VERSION = '1.0.0_final'; // 키값 변경으로 강제 노출
 
 function checkVersionNotice() {
     if (!modalNotice) return;
@@ -1199,12 +1198,9 @@ function checkVersionNotice() {
         return;
     }
 
-    // 2. 버전별 최초 노출 체크
-    const lastNotifiedVersion = localStorage.getItem('autotrans_notice_v1');
-    if (lastNotifiedVersion !== NOTICE_VERSION) {
-        modalNotice.classList.add('active');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
+    // 2. 만료 기간이 아니거나 설정이 없으면 무조건 노출 (닫기만 누르면 새로고침 시 다시 나옴)
+    modalNotice.classList.add('active');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 if (btnCloseNotice) {
@@ -1212,15 +1208,18 @@ if (btnCloseNotice) {
         const hideToday = document.getElementById('notice-hide-today').checked;
         const hideWeek = document.getElementById('notice-hide-week').checked;
         
+        let expire = 0;
         if (hideWeek) {
-            const expire = Date.now() + (7 * 24 * 60 * 60 * 1000);
-            localStorage.setItem('autotrans_notice_expires', expire);
+            expire = Date.now() + (7 * 24 * 60 * 60 * 1000);
         } else if (hideToday) {
-            const expire = Date.now() + (24 * 60 * 60 * 1000);
-            localStorage.setItem('autotrans_notice_expires', expire);
+            expire = Date.now() + (24 * 60 * 60 * 1000);
         }
 
-        localStorage.setItem('autotrans_notice_v1', NOTICE_VERSION);
+        if (expire > 0) {
+            localStorage.setItem('autotrans_notice_expires', expire);
+        }
+        
+        // 단순 닫기 시에는 localStorage에 seen 플래그를 남기지 않아 다음 접속 시 또 보이게 함
         modalNotice.classList.remove('active');
     });
 }
