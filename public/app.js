@@ -449,8 +449,8 @@ function updateUI(project) {
             progressIcon.innerHTML = '<i data-lucide="loader-2" class="spin" color="#0ea5e9" size="40"></i>';
             
             // 상세 상태 표시
-            if (project.subStatus && progress < 5) {
-                progressStatus.textContent = project.subStatus;
+            if (project.subStatus) {
+                progressStatus.innerHTML = `<div class="sub-status">${project.subStatus}</div><div class="main-status">${translatedPages} / ${totalPages} 페이지 완료됨</div>`;
             } else {
                 progressStatus.textContent = `${translatedPages} / ${totalPages} 페이지 완료됨`;
             }
@@ -1053,8 +1053,9 @@ btnStopProcess.addEventListener('click', async () => {
         const response = await fetch(`/api/stop/${currentBatchId}`, { method: 'POST' });
         const data = await response.json();
         if (data.success) {
-            // progressStatus.textContent = "중지 요청됨... 마지막 페이지 처리 중";
+            btnStopProcess.innerHTML = '<i data-lucide="loader-2" class="spin"></i> 중단 요청 중...';
             btnStopProcess.disabled = true;
+            progressStatus.textContent = "작업을 안전하게 중단하고 있습니다. 잠시만 기다려 주세요.";
         }
     } catch (err) {
         alert('중지 요청 실패');

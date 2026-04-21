@@ -45,10 +45,12 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
     
     try {
       if (file.mimetype === 'application/pdf') {
-        project.subStatus = '문서를 페이지 단위로 분할하는 중...';
-        storage.saveProject(project);
-
-        const pages = file.pages.length > 0 ? file.pages : (await splitPdf(file.path, outputDir)).map(p => ({
+        const pages = file.pages.length > 0 ? file.pages : (await splitPdf(file.path, outputDir, async (current, total) => {
+            project.subStatus = `문서를 분할하는 중... (${current}/${total} 페이지)`;
+            storage.saveProject(project);
+            // Non-blocking delay for UI responsiveness
+            await new Promise(r => setTimeout(r, 10)); 
+        })).map(p => ({
           id: `${file.id}_p${p.index}`,
           pageNumber: p.index, 
           path: p.path, 
@@ -94,7 +96,7 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
         storage.saveProject(project);
         
         try {
-          const base64 = fs.readFileSync(file.path).toString('base64');
+          const base64 = (await fs.promises.readFile(file.path)).toString('base64');
           let result;
           
           const targetLanguage = options.targetLangLabel || options.targetLang || 'Korean';
@@ -540,8 +542,13 @@ async function processGlobalVocabulary(project, file, units, options) {
     console.log(`[Global Sprint] Translating ${units.length} unique units in ${batches.length} batches.`);
     
     // 워커 풀을 사용하여 배치 번역 (병렬 처리)
+    let batchIndex = 0;
     await runInPool(batches, 5, async (batch) => {
         if (project.stopRequested) return;
+        batchIndex++;
+        project.subStatus = `문서 내 공통 용어 분석 중... (배치 ${batchIndex}/${batches.length})`;
+        storage.saveProject(project);
+
         const targetLanguage = options.targetLangLabel || options.targetLang || 'Korean';
         const result = await translator.translateBulkUnits(batch, 'auto', targetLanguage, options.apiKey, options);
         
