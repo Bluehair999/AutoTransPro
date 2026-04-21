@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 
 // Glossary APIs
 app.get('/api/glossary/:projectId', (req, res) => {
@@ -118,13 +119,15 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
     
     // Trigger processing asynchronously
     const options = {
-      apiKey: req.body.apiKey,
+      apiKey: req.body.apiKey || process.env.OPENAI_API_KEY,
       geminiApiKey: req.body.geminiApiKey,
       model: req.body.model,
       tone: req.body.tone,
       srcLang: req.body.srcLang || 'auto',
       targetLang: targetLangCode,
-      targetLangLabel: langMap[targetLangCode] || 'Korean' // [추가] 큐 매니저에서 사용할 레이블
+      targetLangLabel: langMap[targetLangCode] || 'Korean',
+      // [수정] 프론트엔드 옵션 전달 반영 (string 'true', 'on', true 모두 허용)
+      enableLayoutPreservation: req.body.enableLayoutPreservation === 'true' || req.body.enableLayoutPreservation === 'on' || req.body.enableLayoutPreservation === true
     };
     
     queue.startProcessing(project, taskQueue, outputDir, options).catch(err => {
@@ -155,6 +158,21 @@ app.get('/api/status/:batchId', (req, res) => {
   }
   if (!project) return res.status(404).json({ error: 'Project not found' });
   res.json(project);
+});
+
+app.get('/api/download-layout/:batchId/:fileId', (req, res) => {
+  const project = taskQueue.get(req.params.batchId) || storage.loadProject(req.params.batchId);
+  if (!project) return res.status(404).json({ error: 'Project not found' });
+  
+  const file = project.files.find(f => f.id === req.params.fileId);
+  if (!file || !file.layoutPath) return res.status(404).json({ error: 'Layout file not found' });
+  
+  const filePath = path.join(__dirname, 'outputs_test', file.layoutPath);
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, `Translated_${file.originalName}`);
+  } else {
+    res.status(404).json({ error: 'File not found on disk' });
+  }
 });
 
 app.get('/api/projects', (req, res) => {

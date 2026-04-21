@@ -6,6 +6,8 @@ const verifier = require('./verifier');
 const path = require('path');
 const fs = require('fs');
 const mammoth = require('mammoth');
+const docxProcessor = require('./docx-processor');
+const pdfProcessor = require('./pdf-processor');
 
 const PRICING = {
   'gpt-4o': { input: 0.005, output: 0.015 },
@@ -177,6 +179,51 @@ async function startProcessing(project, taskQueue, outputDir, options = {}) {
       
       if (file.status !== 'failed') {
           file.status = file.pages.length > 0 && file.pages.every(p => p.status === 'completed' || p.status === 'skipped') ? 'completed' : 'failed';
+          
+          // [추가] 양식 보존 번역 결과물 생성
+          if (file.status === 'completed' && options.enableLayoutPreservation) {
+              try {
+                  const ext = path.extname(file.originalName).toLowerCase();
+                  console.log(`[Layout Preservation Start] Processing ${file.originalName} (Mime: ${file.mimetype}, Ext: ${ext})`);
+                  
+                  project.subStatus = `${file.originalName}의 원본 양식 재구성 중...`;
+                  storage.saveProject(project);
+                  
+                  // [최적화] 이미 완료된 페이지들의 번역본을 수집하여 레이아웃 프로세서에 전달 (재번역 방지)
+                  const preTranslatedMap = {};
+                  file.pages.forEach(p => {
+                      if (p.originalText && p.translatedText) {
+                          preTranslatedMap[p.originalText] = p.translatedText;
+                      }
+                  });
+
+                  let layoutPath;
+                  if (file.mimetype === 'application/pdf' || ext === '.pdf') {
+                      layoutPath = await pdfProcessor.translatePdf(file.path, outputDir, {
+                          ...options,
+                          preTranslatedMap,
+                          onProgress: (status) => {
+                              project.subStatus = `${file.originalName}: ${status}`;
+                              storage.saveProject(project);
+                          }
+                      });
+                  } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || ext === '.docx') {
+                      layoutPath = await docxProcessor.translateDocx(file.path, outputDir, options);
+                  }
+                  
+                  if (layoutPath) {
+                      file.layoutPath = path.basename(layoutPath);
+                      console.log(`[Layout Preservation Success] ${file.originalName} -> ${file.layoutPath}`);
+                  } else {
+                      console.log(`[Layout Preservation Skip] No layoutPath generated for ${file.originalName}`);
+                  }
+              } catch (layoutErr) {
+                  console.error(`[Layout Preservation Failed] ${file.originalName}:`, layoutErr);
+                  // 양식 보존 실패가 전체 번역 실패로 이어지지는 않도록 처리 (subStatus에만 간략히 표시 가능)
+                  project.subStatus = `양식 보존본 생성 중 오류: ${layoutErr.message}`;
+                  storage.saveProject(project);
+              }
+          }
       }
       project.usage.duration = Math.floor((Date.now() - project.usage.startTime) / 1000);
       storage.saveProject(project);

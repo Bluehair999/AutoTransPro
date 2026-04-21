@@ -141,7 +141,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <div class="version-tag">v0.1.1</div>
+                <div class="version-tag">V1.0.0</div>
                 <button id="btn-toggle-glossary" class="btn-ghost">
                     <i data-lucide="book-marked"></i> 용어집 관리
                 </button>
@@ -191,6 +191,9 @@
                     </button>
                     <button id="btn-export-main" class="btn-secondary btn-sm" disabled title="결과 내보내기 옵션 열기">
                         <i data-lucide="download"></i> <span>결과 내보내기</span>
+                    </button>
+                    <button id="btn-download-layout" class="btn-primary btn-sm hidden" title="원본 양식 유지 버전 다운로드">
+                        <i data-lucide="file-check"></i> <span>양식 보존본 다운로드</span>
                     </button>
                     <button id="btn-theme-toggle" class="btn-ghost btn-sm" title="다크/라이트 테마 전환">
                         <i data-lucide="sun" id="theme-icon"></i>
@@ -265,6 +268,13 @@
                     <span>OCR 모드 활성화 (스캔된 문서/이미지 위주)</span>
                 </label>
             </div>
+            <div class="form-group mt-2">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="enable-layout-preservation" checked>
+                    <span class="text-primary-bold">원본 양식 보존 (베타)</span>
+                </label>
+                <small class="text-muted ml-25px">Word/PDF 파일의 레이아웃을 최대한 유지하며 번역합니다.</small>
+            </div>
             <div class="modal-actions mt-30px flex gap-10px">
                 <button id="btn-cancel-upload" class="btn-secondary flex-1">취소</button>
                 <button id="btn-start-process" class="btn-primary flex-1">번역 시작</button>
@@ -293,6 +303,62 @@
             
             <div id="progress-complete-actions" class="progress-actions-container mt-25px">
                 <button id="btn-close-progress" class="btn-primary btn-full-width">완료 및 결과 보기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal (V1.0.0) -->
+    <div id="modal-notice" class="modal">
+        <div class="modal-content modal-medium max-w-95 p-0 overflow-hidden">
+            <div class="notice-header">
+                <div class="notice-header-badge">PUBLIC TEST</div>
+                <h2>🎉 AutoTrans Pro V1.0.0 정식 배포</h2>
+                <p><strong>[공지] 현재 공개 테스트 기간입니다 (~4월 24일까지)</strong></p>
+                <p>더 빠르고 정확한 전문가용 번역 도우미로 거듭났습니다.</p>
+            </div>
+            <div class="notice-body p-30px">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i data-lucide="zap"></i>
+                        <h4>멀티 AI 엔진</h4>
+                        <p>GPT-4o 및 Gemini 2.0 기반 고성능 번역</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="file-check"></i>
+                        <h4>다양한 포맷</h4>
+                        <p>PDF, Word, 이미지 파일 정밀 지원</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="book-open"></i>
+                        <h4>기술 용어집</h4>
+                        <p>프로젝트별 전문 용어 자동 적용 및 관리</p>
+                    </div>
+                    <div class="feature-card">
+                        <i data-lucide="layout"></i>
+                        <h4>실시간 대조</h4>
+                        <p>원본과 번역문의 완벽한 좌우 레이아웃 공유</p>
+                    </div>
+                </div>
+                
+                <div class="notice-alert mt-25px">
+                    <div class="alert-icon"><i data-lucide="flask-conical"></i></div>
+                    <div class="alert-content">
+                        <strong>원본 양식 보존 기능 (BETA)</strong>
+                        <p>현재 원본 유지 기능은 안정화 테스트 중입니다. 복잡한 표나 레이아웃의 경우 결과가 완벽하지 않을 수 있음을 알려드립니다.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions notice-footer bg-sidebar-alt">
+                <div class="notice-footer-options">
+                    <label class="checkbox-label-sm">
+                        <input type="checkbox" id="notice-hide-today"> 오늘 하루 안 보기
+                    </label>
+                    <div class="divider-v"></div>
+                    <label class="checkbox-label-sm">
+                        <input type="checkbox" id="notice-hide-week"> 1주일간 안 보기
+                    </label>
+                </div>
+                <button id="btn-close-notice" class="btn-premium btn-sm-notice">닫기</button>
             </div>
         </div>
     </div>

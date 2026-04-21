@@ -24,6 +24,8 @@ const btnResetAll = document.getElementById('btn-reset-all');
 const btnStopProcess = document.getElementById('btn-stop-process');
 const btnCancelProcess = document.getElementById('btn-cancel-process');
 const progressRunningActions = document.getElementById('progress-running-actions');
+const btnDownloadLayout = document.getElementById('btn-download-layout');
+const enableLayoutCheckbox = document.getElementById('enable-layout-preservation');
 
 const glossarySrc = document.getElementById('glossary-src');
 const glossaryTgt = document.getElementById('glossary-tgt');
@@ -244,6 +246,7 @@ btnStartProcess.addEventListener('click', async () => {
         formData.append('srcLang', srcLangSelect.value);
         formData.append('targetLang', targetLangSelect.value);
         formData.append('isOcr', isOcrMode);
+        formData.append('enableLayoutPreservation', enableLayoutCheckbox ? enableLayoutCheckbox.checked : false);
         formData.append('ownerId', ownerId);
 
         const response = await fetch('/api/upload', {
@@ -347,6 +350,37 @@ function startPolling() {
                     progressCompleteActions.style.display = 'block';
                     progressCompleteActions.style.opacity = '1';
                     progressCompleteActions.style.transform = 'translateY(0)';
+                    
+                    // [개선] 양식 보존본 다운로드 링크 생성 (프리미엄 디자인)
+                    const hasLayout = project.files && project.files.some(f => f.layoutPath);
+                    
+                    // 기존 버튼 컨테이너가 있으면 제거 후 새로 생성 (전체 레이아웃 제어)
+                    const oldContainer = progressCompleteActions.querySelector('.success-actions-container');
+                    if (oldContainer) oldContainer.remove();
+                    
+                    const actionsContainer = document.createElement('div');
+                    actionsContainer.className = 'success-actions-container mt-25px';
+                    
+                    // 1. 결과 보기 버튼 (메인)
+                    const closeBtn = document.getElementById('btn-close-progress');
+                    closeBtn.className = 'btn-premium w-full';
+                    closeBtn.innerHTML = '<i data-lucide="layout-dashboard"></i> 완료 및 결과 보기';
+                    // 기존 버튼을 컨테이너 안으로 이동
+                    actionsContainer.appendChild(closeBtn);
+
+                    if (hasLayout) {
+                        const fileWithLayout = project.files.find(f => f.layoutPath);
+                        const downloadBtn = document.createElement('button');
+                        downloadBtn.className = 'btn-premium-outline w-full';
+                        downloadBtn.innerHTML = '<i data-lucide="file-check"></i> 원본 양식 보존본 다운로드';
+                        downloadBtn.onclick = () => {
+                            window.location.href = `/api/download-layout/${project.id}/${fileWithLayout.id}`;
+                        };
+                        actionsContainer.appendChild(downloadBtn);
+                    }
+                    
+                    progressCompleteActions.appendChild(actionsContainer);
+                    lucide.createIcons();
                     
                     // [추가] 완료 시 히스토리 즉시 새로고침
                     loadProjectHistory();
@@ -452,6 +486,16 @@ function updateUI(project) {
         }, 100);
     } else {
         lucide.createIcons();
+    }
+    
+    // [추가] 양식 보존본 다운로드 버튼 가시성 제어
+    if (btnDownloadLayout) {
+        const hasLayout = project.files && project.files.some(f => f.layoutPath);
+        if (project.status === 'completed' && hasLayout) {
+            btnDownloadLayout.classList.remove('hidden');
+        } else {
+            btnDownloadLayout.classList.add('hidden');
+        }
     }
     
     jobStatusBadge.textContent = project.status === 'completed' ? '완료' : (project.status === 'stopped' ? '중단됨' : (project.status === 'failed' ? '결과 오류' : '처리 중...'));
@@ -607,6 +651,21 @@ document.getElementById('btn-next-page').addEventListener('click', (e) => {
         updateUI(currentProjectData);
     }
 });
+
+// [추가] 양식 보존본 다운로드 핸들러
+if (btnDownloadLayout) {
+    btnDownloadLayout.addEventListener('click', () => {
+        if (!currentProjectData || !currentProjectData.files) return;
+        
+        // 레이아웃 파일이 있는 첫 번째 파일을 다운로드 (멀티 파일 지원은 향후 확장)
+        const fileWithLayout = currentProjectData.files.find(f => f.layoutPath);
+        if (fileWithLayout) {
+            window.location.href = `/api/download-layout/${currentProjectData.id}/${fileWithLayout.id}`;
+        } else {
+            alert('다운로드 가능한 양식 보존 파일이 없습니다.');
+        }
+    });
+}
 
 // Native Export System
 btnExportMain.addEventListener('click', async () => {
@@ -1118,3 +1177,48 @@ loadSettings();
 loadTheme();
 loadProjectHistory();
 lucide.createIcons();
+
+// [추가] V1.0.0 정식 배포 안내 팝업 로직 (강제 갱신 키 사용)
+const modalNotice = document.getElementById('modal-notice');
+const btnCloseNotice = document.getElementById('btn-close-notice');
+const NOTICE_VERSION = '1.0.0_final'; // 키값 변경으로 강제 노출
+
+function checkVersionNotice() {
+    if (!modalNotice) return;
+    
+    // 1. 유효기간(오늘 하루/1주일) 체크
+    const expireTime = localStorage.getItem('autotrans_notice_expires');
+    const now = Date.now();
+    if (expireTime && now < parseInt(expireTime)) {
+        console.log('[Notice] In hide-period. Skipping display.');
+        return;
+    }
+
+    // 2. 버전별 최초 노출 체크
+    const lastNotifiedVersion = localStorage.getItem('autotrans_notice_v1');
+    if (lastNotifiedVersion !== NOTICE_VERSION) {
+        modalNotice.classList.add('active');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+}
+
+if (btnCloseNotice) {
+    btnCloseNotice.addEventListener('click', () => {
+        const hideToday = document.getElementById('notice-hide-today').checked;
+        const hideWeek = document.getElementById('notice-hide-week').checked;
+        
+        if (hideWeek) {
+            const expire = Date.now() + (7 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('autotrans_notice_expires', expire);
+        } else if (hideToday) {
+            const expire = Date.now() + (24 * 60 * 60 * 1000);
+            localStorage.setItem('autotrans_notice_expires', expire);
+        }
+
+        localStorage.setItem('autotrans_notice_v1', NOTICE_VERSION);
+        modalNotice.classList.remove('active');
+    });
+}
+
+// 명시적으로 약간의 지연 후 실행 (DOM 안정화 대기)
+setTimeout(checkVersionNotice, 500);
