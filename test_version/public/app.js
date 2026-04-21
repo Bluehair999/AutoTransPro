@@ -394,7 +394,18 @@ function startPolling() {
                     progressCompleteActions.style.display = 'block';
                     progressCompleteActions.style.opacity = '1';
                     progressCompleteActions.style.transform = 'translateY(0)';
-                    if (progressStatus) progressStatus.textContent = "문서 처리 중 심각한 오류가 발생했습니다. (.doc 등 미지원 파일일 수 있습니다.)";
+                    
+                    let errorMsg = "문서 처리 중 심각한 오류가 발생했습니다.";
+                    if (project.files) {
+                        const fileWithError = project.files.find(f => f.error);
+                        if (fileWithError) {
+                            errorMsg = fileWithError.error;
+                        } else {
+                            const pageWithError = project.files.flatMap(f => f.pages || []).find(p => p.error);
+                            if (pageWithError) errorMsg = pageWithError.error;
+                        }
+                    }
+                    if (progressStatus) progressStatus.textContent = "오류 내용: " + errorMsg + "\n(API 키 설정 등을 확인해주세요)";
                 }
                 
                 lucide.createIcons();
